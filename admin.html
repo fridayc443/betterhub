@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Admin | BetterHub</title>
+<style>
+:root{--bg:#F6F4FF;--surface:#FFFFFF;--text:#150F2E;--muted:#5A5476;--line:#E3DEF6;--brand:#6A2BEA;--brand-ink:#FFFFFF;--soft:#EDE6FF;--ok:#0F7B4B;--bad:#C0264B;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#0A0716;--surface:#140F2B;--text:#F1EEFF;--muted:#A8A1CC;--line:#2A2354;--brand:#8E5CFF;--brand-ink:#0A0716;--soft:#221A4A;--ok:#4FD39B;--bad:#FF7A9C}}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:40}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+a{color:inherit}button,input,select{font:inherit;color:inherit}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:12px;align-items:center;z-index:30}
+header b{font-size:18px}header a{margin-left:auto;font-size:15px}
+main{max-width:760px;margin:0 auto;padding:16px 16px 64px}
+h2{font-size:18px;margin:28px 0 10px}h3{margin:0 0 8px;font-size:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.muted{color:var(--muted)}.small{font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.stats b{display:block;font-size:22px}
+.btn{padding:10px 16px;border-radius:10px;border:0;background:var(--brand);color:var(--brand-ink);font-weight:700;cursor:pointer}
+.btn.alt{background:var(--soft);color:var(--text)}.btn[disabled]{opacity:.5}
+input,select{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--surface)}
+label{display:grid;gap:5px;font-weight:600;font-size:14px;margin-bottom:10px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+pre{background:var(--soft);border-radius:10px;padding:12px;overflow:auto;max-height:320px;font-size:12px;white-space:pre-wrap;word-break:break-word}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}.ok{color:var(--ok)}.bad{color:var(--bad)}
+.msg{min-height:1.3em;font-size:14px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header><b>BetterHub Admin</b><a href="app.html">Customer dashboard</a></header>
+<main>
+<p id="gate" class="muted">Checking access...</p>
+<div id="panel" hidden>
+
+<h2>Overview</h2>
+<div class="stats">
+<div class="card"><span class="muted small">Registered users</span><b id="oU">-</b></div>
+<div class="card"><span class="muted small">Orders</span><b id="oO">-</b></div>
+<div class="card"><span class="muted small">Wallet liabilities</span><b id="oW">-</b></div></div>
+
+<h2>Provider: Get Your OTP</h2>
+<div class="card"><h3>Connection</h3>
+<p class="muted small" style="margin-top:0">Checks the public catalogue and times the response. Purchases stay switched off until we confirm the response formats below.</p>
+<button class="btn" id="hBtn">Check connection</button> <span id="hOut" class="small" role="status"></span></div>
+<div class="card"><h3>Catalogue explorer</h3>
+<p class="muted small" style="margin-top:0">Shows the supplier’s raw reply. Run each one once, tap Copy, and send it to Claude so the integration can be finished exactly to their format.</p>
+<div class="two"><label>Call<select id="eCall"><option value="countries">countries</option><option value="services">services (needs country)</option><option value="operatorPrices">operatorPrices (needs country + product)</option></select></label>
+<label>Country<input id="eCountry" placeholder="from the countries reply"></label></div>
+<label>Product<input id="eProd" placeholder="from the services reply"></label>
+<button class="btn" id="eBtn">Run</button> <button class="btn alt" id="eCopy" hidden>Copy full reply</button>
+<pre id="eOut" hidden></pre></div>
+
+<h2>Pricing</h2>
+<div class="card"><p class="muted small" style="margin-top:0">Applies to every service. Customer price = provider cost plus your markup, never less than your minimum profit.</p>
+<div class="two"><label>Markup type<select id="pType"><option value="percent">Percentage</option><option value="fixed">Fixed amount (₦)</option><option value="custom">Fixed retail price (₦)</option></select></label>
+<label><span id="pLbl">Percent</span><input id="pVal" inputmode="decimal"></label></div>
+<label>Minimum profit per order (₦)<input id="pMin" inputmode="decimal" value="0"></label>
+<button class="btn" id="pSave">Save pricing</button> <span id="pMsg" class="msg" role="status"></span>
+<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+<label>Preview: provider cost (₦)<input id="qCost" inputmode="decimal" placeholder="e.g. 500"></label>
+<button class="btn alt" id="qBtn">Preview price</button> <span id="qOut" class="small"></span></div>
+
+<h2>Service categories</h2>
+<div class="card" id="cats"></div>
+
+<h2>Customers</h2>
+<div class="card"><label>Search by email<input id="uQ" placeholder="start of an email, or leave empty for newest"></label>
+<button class="btn" id="uBtn">Search</button><div id="uList" style="margin-top:10px"></div></div>
+<div class="card" id="uPanel" hidden><h3 id="uName"></h3><p class="muted small" id="uInfo" style="margin-top:0"></p>
+<div class="two"><label>Amount (₦, negative to debit)<input id="aAmt" inputmode="decimal"></label><label>Reason<input id="aWhy" maxlength="200"></label></div>
+<button class="btn" id="aBtn">Apply to wallet</button> <button class="btn alt" id="sBtn"></button> <span id="uMsg" class="msg" role="status"></span></div>
+
+</div></main>
+<script type="module" src="./admin.js"></script>
+</body>
+</html>
