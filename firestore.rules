@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function role() { return request.auth.token.get('role', ''); }
+    function isStaff() { return signedIn() && role() in ['admin', 'support']; }
+    function isAdmin() { return signedIn() && role() == 'admin'; }
+    function mine(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read: if mine(uid) || isStaff();
+      allow create: if mine(uid)
+        && request.resource.data.keys().hasOnly(['displayName', 'email', 'role', 'status', 'createdAt'])
+        && request.resource.data.role == 'customer'
+        && request.resource.data.status == 'active'
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 80
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.createdAt == request.time;
+      allow update: if mine(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 80;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Money and orders: readable by the owner, written only by server code (Admin SDK bypasses rules).
+    match /wallets/{uid} { allow read: if mine(uid) || isStaff(); allow write: if false; }
+    match /walletTransactions/{id} { allow read: if signedIn() && (resource.data.userId == request.auth.uid || isStaff()); allow write: if false; }
+    match /orders/{id} { allow read: if signedIn() && (resource.data.userId == request.auth.uid || isStaff()); allow write: if false; }
+    match /payments/{id} { allow read: if signedIn() && (resource.data.userId == request.auth.uid || isStaff()); allow write: if false; }
+    match /notifications/{id} { allow read: if signedIn() && resource.data.userId == request.auth.uid; allow write: if false; }
+
+    match /categories/{id} { allow read: if signedIn() && (resource.data.active == true || isStaff()); allow write: if false; }
+    match /services/{id} { allow read: if signedIn() && (resource.data.active == true || isStaff()); allow write: if false; }
+
+    // providers, providerServices, pricingRules, systemSettings, auditLogs, supportTickets: server only for now.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

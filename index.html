@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BetterHub | Your Digital Services, One Better Hub</title>
+<meta name="description" content="BetterHub: virtual numbers and digital services from one Naira wallet.">
+<style>
+:root{--bg:#F6F4FF;--surface:#FFFFFF;--text:#150F2E;--muted:#5A5476;--line:#E3DEF6;--brand:#6A2BEA;--brand-ink:#FFFFFF;--soft:#EDE6FF;--hero:#0D0920;--hero-text:#FFFFFF;--hero-muted:#BDB4E6;--ok:#0F7B4B;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A0716;--surface:#140F2B;--text:#F1EEFF;--muted:#A8A1CC;--line:#2A2354;--brand:#8E5CFF;--brand-ink:#0A0716;--soft:#221A4A;--ok:#4FD39B}}
+:root[data-theme="dark"]{--bg:#0A0716;--surface:#140F2B;--text:#F1EEFF;--muted:#A8A1CC;--line:#2A2354;--brand:#8E5CFF;--brand-ink:#0A0716;--soft:#221A4A;--ok:#4FD39B}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar{max-width:1080px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;text-decoration:none;letter-spacing:-.02em}
+.logo svg{width:32px;height:32px}.logo b{color:var(--brand)}
+nav{margin-left:auto;display:flex;gap:4px;align-items:center}
+nav a{padding:8px 12px;border-radius:8px;text-decoration:none;font-size:15px;color:var(--muted)}
+nav a:hover,nav a.on{color:var(--text);background:var(--soft)}
+nav a.cta{background:var(--brand);color:var(--brand-ink);font-weight:600}
+.menu{display:none;margin-left:auto;background:none;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 12px;font:inherit}
+main{max-width:1080px;margin:0 auto;padding:0 20px}
+section.page{display:none;padding:40px 0 64px}section.page.on{display:block}
+h1{font-size:clamp(32px,6vw,52px);line-height:1.08;letter-spacing:-.03em;margin:0 0 16px}
+h2{font-size:clamp(22px,3.5vw,30px);letter-spacing:-.02em;margin:40px 0 12px}
+h3{margin:0 0 6px;font-size:18px}
+p{max-width:64ch;margin:0 0 14px}.muted{color:var(--muted)}
+.hero{background:var(--hero);color:var(--hero-text);border-radius:20px;padding:clamp(28px,6vw,64px);margin-bottom:8px}
+.hero p{color:var(--hero-muted);font-size:18px}
+.btn{display:inline-block;padding:12px 20px;border-radius:10px;background:var(--brand);color:var(--brand-ink);font-weight:700;text-decoration:none;border:0;font:inherit;font-weight:700;cursor:pointer}
+.btn.alt{background:transparent;color:inherit;border:1px solid currentColor;margin-left:8px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.card p{margin:0;color:var(--muted);font-size:15px}
+.tag{display:inline-block;font-size:13px;padding:2px 10px;border-radius:99px;background:var(--soft);margin-bottom:10px}
+.tag.live{background:var(--ok);color:var(--brand-ink)}
+.steps{counter-reset:s;list-style:none;padding:0;display:grid;gap:12px}
+.steps li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 16px 16px 56px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:28px;height:28px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-weight:700}
+.tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:480px}
+th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line)}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}details p{margin:10px 0 0;color:var(--muted)}
+form{max-width:420px;display:grid;gap:14px}
+label{display:grid;gap:6px;font-weight:600;font-size:15px}
+input{font:inherit;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text)}
+.msg{min-height:1.4em;font-size:15px;color:var(--muted)}.msg.err{color:#C0264B}
+footer{border-top:1px solid var(--line);margin-top:24px}
+.foot{max-width:1080px;margin:0 auto;padding:24px 20px;display:flex;flex-wrap:wrap;gap:8px 20px;color:var(--muted);font-size:14px}
+.foot a{text-decoration:none}
+@media (max-width:760px){.menu{display:block}nav{display:none;position:absolute;left:0;right:0;top:100%;background:var(--bg);border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;padding:8px 20px 16px}nav.open{display:flex}.bar{position:relative}}
+@media (prefers-reduced-motion:no-preference){section.page.on{animation:in .25s ease}@keyframes in{from{opacity:0}to{opacity:1}}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="mark" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#6A2BEA"/><path d="M10 8h7a4.5 4.5 0 0 1 0 8h-7zM10 16h8a4 4 0 0 1 0 8h-8z" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><path d="M5 27c8 2 17-1 22-10" stroke="#C9AEFF" stroke-width="1.8" fill="none" stroke-linecap="round"/></symbol></svg>
+<header><div class="bar">
+<a class="logo" href="#home"><svg role="img" aria-label="BetterHub logo"><use href="#mark"/></svg>Better<b>Hub</b></a>
+<button class="menu" id="menu" aria-expanded="false" aria-controls="nav">Menu</button>
+<nav id="nav" aria-label="Main">
+<a href="#services">Services</a><a href="#pricing">Pricing</a><a href="#about">About</a><a href="#faqs">FAQs</a><a href="#contact">Contact</a><a href="#login">Log in</a><a class="cta" href="#register">Create account</a>
+</nav></div></header>
+<main>
+
+<section class="page" id="home">
+<div class="hero">
+<h1>Your digital services, one better hub.</h1>
+<p>Buy virtual numbers for SMS verification and more from a single Naira wallet. See the price before you pay. Get your result in your dashboard.</p>
+<a class="btn" href="#register">Create account</a><a class="btn alt" href="#services">See services</a>
+</div>
+<h2>How it works</h2>
+<ol class="steps">
+<li><h3>Fund your wallet</h3><p class="muted">Top up in Naira through an approved payment gateway.</p></li>
+<li><h3>Choose a service</h3><p class="muted">Pick a country and service. The final price shows before you confirm.</p></li>
+<li><h3>Receive your result</h3><p class="muted">Your number and code appear in your dashboard. Failed orders are refunded to your wallet.</p></li>
+</ol>
+<h2>What you can buy</h2>
+<div class="grid">
+<div class="card"><span class="tag live">First release</span><h3>Virtual numbers</h3><p>Temporary numbers to receive SMS codes for your own accounts.</p></div>
+<div class="card"><span class="tag">Coming soon</span><h3>VPN plans</h3><p>Subscription packages delivered to your dashboard.</p></div>
+<div class="card"><span class="tag">Coming soon</span><h3>Gifts and eSIMs</h3><p>Gift cards and travel data packages by country.</p></div>
+</div>
+</section>
+
+<section class="page" id="services">
+<h1>Services</h1><p class="muted">Each service is switched on only when it is ready and approved.</p>
+<div class="grid">
+<div class="card"><span class="tag live">Opening first</span><h3>Virtual numbers</h3><p>Choose a country and service, then receive the SMS code for your own account verification.</p></div>
+<div class="card"><span class="tag">Coming soon</span><h3>eSIM</h3><p>Data packages by country, with activation details delivered after purchase.</p></div>
+<div class="card"><span class="tag">Coming soon</span><h3>VPN</h3><p>Plans by duration, with login details or setup instructions.</p></div>
+<div class="card"><span class="tag">Coming soon</span><h3>Gifts</h3><p>Gift products by country, currency and amount.</p></div>
+<div class="card"><span class="tag">Under review</span><h3>Social growth</h3><p>Stays off until it passes our compliance review.</p></div>
+</div>
+</section>
+
+<section class="page" id="about">
+<h1>About BetterHub</h1>
+<p>BetterHub is a Nigerian digital services marketplace. We work with several suppliers behind the scenes, so you deal with one account, one wallet and one support team.</p>
+<p>We set our own prices, keep every transaction on record, and refund orders that fail. When a supplier is slow or unavailable, we reconcile the order before refunding, so you are not charged twice or left without a result.</p>
+<h2>What we stand for</h2>
+<div class="grid">
+<div class="card"><h3>Clear prices</h3><p>You see the full price before every purchase.</p></div>
+<div class="card"><h3>Safe wallet</h3><p>Balances change only through verified server-side records.</p></div>
+<div class="card"><h3>Allowed uses only</h3><p>We do not sell services that break other platforms’ rules.</p></div>
+</div>
+</section>
+
+<section class="page" id="pricing">
+<h1>Pricing</h1>
+<p>There are no subscriptions or hidden fees. You pay per order from your wallet, in Naira. Live prices depend on the country, service and supplier stock, so they appear on the buy page once you sign in.</p>
+<div class="tbl"><table>
+<thead><tr><th>Service</th><th>How it is priced</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Virtual numbers</td><td>Per number, by country and service</td><td>Opening first</td></tr>
+<tr><td>eSIM</td><td>Per data package</td><td>Coming soon</td></tr>
+<tr><td>VPN</td><td>Per plan and duration</td><td>Coming soon</td></tr>
+<tr><td>Gifts</td><td>Per denomination</td><td>Coming soon</td></tr>
+</tbody></table></div>
+<p class="muted" style="margin-top:14px">Wallet funding fees, if any, are shown at checkout before you pay.</p>
+</section>
+
+<section class="page" id="contact">
+<h1>Contact</h1>
+<p>The fastest way to reach us is WhatsApp. Include your account email and order reference so we can find your order quickly.</p>
+<a class="btn" href="https://wa.me/2347026045216" rel="noopener">Message us on WhatsApp</a>
+<p class="muted" style="margin-top:16px">Phone: +234 702 604 5216. In-app support tickets arrive with the customer dashboard.</p>
+</section>
+
+<section class="page" id="faqs">
+<h1>FAQs</h1>
+<details><summary>What can I use virtual numbers for?</summary><p>Receiving SMS verification codes for your own accounts. Do not use them for fraud, impersonation or anything that breaks a platform’s rules.</p></details>
+<details><summary>How do I pay?</summary><p>Fund your wallet in Naira, then every order draws from that balance. Payment gateway details will be listed here when funding opens.</p></details>
+<details><summary>What if my order fails?</summary><p>If the order definitively fails, the amount returns to your wallet and you get a notification. If the supplier is just slow, we check the order status first before refunding.</p></details>
+<details><summary>Can I get a refund after I receive my code?</summary><p>No. Once a code is delivered the service has been used. Cancelled orders with no code are refunded.</p></details>
+<details><summary>Is my wallet balance safe?</summary><p>Only our servers can change balances, and every change is written to a permanent record you can view in your transaction history.</p></details>
+<details><summary>How do I contact support?</summary><p>Message us on WhatsApp from the Contact page.</p></details>
+</section>
+
+<section class="page" id="terms">
+<h1>Terms of Service</h1>
+<p class="muted">Draft for review by a lawyer before launch. Last updated 15 November 2026.</p>
+<h2>Accounts</h2><p>You must give accurate details and keep your login private. You are responsible for activity on your account. We may suspend accounts that break these terms.</p>
+<h2>Permitted use</h2><p>Use services only for lawful purposes and only for your own accounts. Fraud, impersonation, spam and breaking other platforms’ rules are prohibited.</p>
+<h2>Wallet and orders</h2><p>Prices are shown before you confirm. Wallet funds are used to pay for orders. Failed orders are refunded to your wallet. Delivered codes and credentials are not refundable.</p>
+<h2>Availability</h2><p>Services depend on third-party suppliers and may be unavailable at times. We do not guarantee that any number will receive a code from every platform.</p>
+<h2>Changes</h2><p>We may update these terms. Continued use means you accept the updated version.</p>
+</section>
+
+<section class="page" id="privacy">
+<h1>Privacy Policy</h1>
+<p class="muted">Draft for review by a lawyer before launch. Last updated 15 November 2026.</p>
+<h2>What we collect</h2><p>Your name, email, account activity, wallet and order records, and support messages.</p>
+<h2>How we use it</h2><p>To run your account, process orders and payments, prevent abuse, and provide support.</p>
+<h2>Who we share it with</h2><p>Payment gateways and service suppliers receive only what is needed to complete your order. We do not sell your personal data.</p>
+<h2>Your choices</h2><p>You can ask us to correct or delete your account data through WhatsApp support, subject to financial record-keeping requirements.</p>
+</section>
+
+<section class="page" id="login">
+<h1>Log in</h1>
+<form data-kind="login" novalidate>
+<label>Email<input type="email" name="email" autocomplete="email" required></label>
+<label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+<button class="btn" type="submit">Log in</button>
+<div class="msg" role="status"></div>
+<p class="muted"><a href="#login" id="forgot" style="text-decoration:underline">Forgot password?</a> Enter your email above first.</p><p class="muted">New here? <a href="#register">Create an account</a></p>
+</form>
+</section>
+
+<section class="page" id="register">
+<h1>Create your account</h1>
+<form data-kind="register" novalidate>
+<label>Full name<input name="name" autocomplete="name" required></label>
+<label>Email<input type="email" name="email" autocomplete="email" required></label>
+<label>Password (8 characters or more)<input type="password" name="password" autocomplete="new-password" required></label>
+<button class="btn" type="submit">Create account</button>
+<div class="msg" role="status"></div>
+<p class="muted">Already registered? <a href="#login">Log in</a></p>
+</form>
+</section>
+
+</main>
+<footer><div class="foot"><span>© 2026 BetterHub · betterhubhq.com</span><a href="#terms">Terms of Service</a><a href="#privacy">Privacy Policy</a><a href="#contact">Contact</a></div></footer>
+<script>
+(function(){
+var pages=["home","services","about","pricing","contact","faqs","terms","privacy","login","register"];
+var names={home:"Home",services:"Services",about:"About",pricing:"Pricing",contact:"Contact",faqs:"FAQs",terms:"Terms of Service",privacy:"Privacy Policy",login:"Log in",register:"Create account"};
+var nav=document.getElementById("nav"),menu=document.getElementById("menu");
+function route(){
+var id=location.hash.slice(1);if(pages.indexOf(id)<0)id="home";
+pages.forEach(function(p){document.getElementById(p).classList.toggle("on",p===id)});
+document.querySelectorAll("nav a").forEach(function(a){a.classList.toggle("on",a.getAttribute("href")==="#"+id)});
+document.title=(id==="home"?"BetterHub":names[id]+" | BetterHub");
+nav.classList.remove("open");menu.setAttribute("aria-expanded","false");window.scrollTo(0,0);
+}
+menu.addEventListener("click",function(){var o=nav.classList.toggle("open");menu.setAttribute("aria-expanded",o)});
+window.addEventListener("hashchange",route);route();
+})();
+</script>
+<script type="module" src="./auth.js"></script>
+</body>
+</html>
