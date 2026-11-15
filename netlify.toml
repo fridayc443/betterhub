@@ -10,6 +10,11 @@
   external_node_modules = ["firebase-admin"]
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api"
+  to = "/.netlify/functions/api"
+  status = 200
+
+[[redirects]]
+  from = "/paystack-webhook"
+  to = "/.netlify/functions/api?hook=paystack"
   status = 200

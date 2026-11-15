@@ -135,7 +135,7 @@ footer{border-top:1px solid var(--line);margin-top:24px}
 <section class="page" id="faqs">
 <h1>FAQs</h1>
 <details><summary>What can I use virtual numbers for?</summary><p>Receiving SMS verification codes for your own accounts. Do not use them for fraud, impersonation or anything that breaks a platform’s rules.</p></details>
-<details><summary>How do I pay?</summary><p>Fund your wallet in Naira, then every order draws from that balance. Payment gateway details will be listed here when funding opens.</p></details>
+<details><summary>How do I pay?</summary><p>Fund your wallet in Naira, then every order draws from that balance. Funding goes through Paystack, and your balance updates as soon as the payment is confirmed.</p></details>
 <details><summary>What if my order fails?</summary><p>If the order definitively fails, the amount returns to your wallet and you get a notification. If the supplier is just slow, we check the order status first before refunding.</p></details>
 <details><summary>Can I get a refund after I receive my code?</summary><p>No. Once a code is delivered the service has been used. Cancelled orders with no code are refunded.</p></details>
 <details><summary>Is my wallet balance safe?</summary><p>Only our servers can change balances, and every change is written to a permanent record you can view in your transaction history.</p></details>
@@ -202,6 +202,80 @@ menu.addEventListener("click",function(){var o=nav.classList.toggle("open");menu
 window.addEventListener("hashchange",route);route();
 })();
 </script>
-<script type="module" src="./auth.js"></script>
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyAW1QoZGKDUgBYL4rkgjqxTLC66bHRyYfU",
+  authDomain: "betterhub-c69b8.firebaseapp.com",
+  projectId: "betterhub-c69b8",
+  storageBucket: "betterhub-c69b8.firebasestorage.app",
+  messagingSenderId: "852351882076",
+  appId: "1:852351882076:web:7ad526c1c532509f5ee799"
+};
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+const ERR = {
+  "auth/email-already-in-use": "That email already has an account. Log in instead.",
+  "auth/invalid-credential": "Wrong email or password.",
+  "auth/weak-password": "Use a password of at least 8 characters.",
+  "auth/too-many-requests": "Too many attempts. Wait a few minutes and try again.",
+  "auth/network-request-failed": "No connection. Check your internet and try again.",
+  "auth/invalid-email": "Enter a valid email address."
+};
+const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+function say(f, text, bad) { const m = f.querySelector(".msg"); m.className = "msg" + (bad ? " err" : ""); m.textContent = text; }
+
+const reg = document.querySelector("form[data-kind=register]");
+const log = document.querySelector("form[data-kind=login]");
+
+reg.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const d = new FormData(reg), name = d.get("name").trim(), email = d.get("email").trim(), pw = d.get("password");
+  if (!name) return say(reg, "Enter your full name.", 1);
+  if (!EMAIL.test(email)) return say(reg, "Enter a valid email address.", 1);
+  if (pw.length < 8) return say(reg, "Use a password of at least 8 characters.", 1);
+  const btn = reg.querySelector("button"); btn.disabled = true; say(reg, "Creating your account...");
+  try {
+    const c = await createUserWithEmailAndPassword(auth, email, pw);
+    say(reg, "Account created. Finishing setup...");
+    // Each extra step gets 8 seconds at most, so a slow or missing database can never freeze sign-up.
+    const soft = (p) => Promise.race([p, new Promise((r) => setTimeout(r, 8000))]).catch(() => {});
+    await soft(updateProfile(c.user, { displayName: name }));
+    await soft(setDoc(doc(db, "users", c.user.uid), { displayName: name, email, role: "customer", status: "active", createdAt: serverTimestamp() }));
+    await soft(sendEmailVerification(c.user));
+    location.href = "app.html";
+  } catch (x) { say(reg, ERR[x.code] || "Something went wrong (" + (x.code || x.message) + "). Try again.", 1); btn.disabled = false; }
+});
+
+log.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const d = new FormData(log), email = d.get("email").trim(), pw = d.get("password");
+  if (!EMAIL.test(email)) return say(log, "Enter a valid email address.", 1);
+  if (!pw) return say(log, "Enter your password.", 1);
+  const btn = log.querySelector("button"); btn.disabled = true; say(log, "Logging in...");
+  try { await signInWithEmailAndPassword(auth, email, pw); location.href = "app.html"; }
+  catch (x) { say(log, ERR[x.code] || "Something went wrong (" + (x.code || x.message) + "). Try again.", 1); btn.disabled = false; }
+});
+
+document.getElementById("forgot").addEventListener("click", async (e) => {
+  e.preventDefault();
+  const email = new FormData(log).get("email").trim();
+  if (!EMAIL.test(email)) return say(log, "Type your email above, then tap Forgot password.", 1);
+  try { await sendPasswordResetEmail(auth, email); } catch (x) { if (x.code === "auth/network-request-failed") return say(log, ERR[x.code], 1); }
+  say(log, "If an account exists for that email, a reset link is on its way.");
+});
+
+onAuthStateChanged(auth, (u) => {
+  if (!u) return;
+  const l = document.querySelector('nav a[href="#login"]'), c = document.querySelector("nav a.cta");
+  l.textContent = "Dashboard"; l.href = "app.html"; c.style.display = "none";
+});
+</script>
 </body>
 </html>

@@ -114,8 +114,8 @@ input[disabled],select[disabled]{opacity:.6}
 <div class="card"><h3>Add funds</h3><p class="muted small">Choose an amount or type your own.</p>
 <div class="chips" id="chips" role="group" aria-label="Quick amounts" style="color:var(--text)"></div>
 <label class="f" style="margin-top:14px;max-width:260px">Amount (₦)<input id="amt" inputmode="numeric" placeholder="e.g. 2000"></label>
-<p style="margin:14px 0 8px"><button class="btn" disabled>Pay with gateway</button></p>
-<p class="muted small" style="margin:0">Payments switch on when a gateway is connected. Your balance only changes after the payment is verified on our servers.</p></div></section>
+<p style="margin:14px 0 8px"><button class="btn" id="payBtn">Pay with Paystack</button> <span class="msg" id="payMsg" role="status"></span></p>
+<p class="muted small" style="margin:0">You pay on Paystack’s secure page and come back here. Your balance only changes after our server confirms the payment with Paystack.</p></div></section>
 
 <section class="view" id="history"><h1>Transaction history</h1><p class="muted">Deposits, purchases and refunds, each with a reference.</p><div id="txList" class="list"></div></section>
 
@@ -124,7 +124,7 @@ input[disabled],select[disabled]{opacity:.6}
 <section class="view" id="support"><h1>Support</h1><p class="muted">Send us the problem and your order reference.</p>
 <form id="tk" novalidate><label class="f">Subject<input name="s"></label><label class="f">Message<textarea name="m" rows="4"></textarea></label>
 <button class="btn" type="submit">Send ticket</button><div class="msg" role="status" id="tkm"></div></form>
-<p class="muted small" style="margin-top:16px">Faster: <a href="https://wa.me/2347026045216" style="text-decoration:underline">message us on WhatsApp</a>.</p></section>
+<p class="muted small" style="margin-top:16px">Faster: <a href="https://wa.me/2347026045216" style="text-decoration:underline">message us on WhatsApp</a>.</p><h2>Your tickets</h2><div id="tkList" class="list"><div class="empty"><b>No tickets yet</b>Tickets you send will appear here with our replies.</div></div></section>
 
 <section class="view" id="profile"><h1>Profile</h1><div class="fields"><label class="f">Full name<input id="pn" disabled></label><label class="f">Email<input id="pe" disabled></label><div class="muted small">Account status: <b id="pst">loading</b>. Name and email are read-only for now.</div></div></section>
 
@@ -176,13 +176,181 @@ function paintTheme(t){document.querySelectorAll("#themeChips .chip").forEach(fu
 var tc=$("themeChips");[["auto","Match phone"],["light","Light"],["dark","Dark"]].forEach(function(o){var b=document.createElement("button");b.className="chip";b.dataset.t=o[0];b.textContent=o[1];b.onclick=function(){setTheme(o[0])};tc.appendChild(b)});paintTheme("auto");
 $("theme").onclick=function(){var cur=document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");setTheme(cur==="dark"?"light":"dark")};
 
-$("tk").addEventListener("submit",function(e){e.preventDefault();var m=$("tkm"),f=e.target;
-if(!f.s.value.trim()||!f.m.value.trim()){m.className="msg";m.style.color="var(--bad)";m.textContent="Add a subject and a message.";return}
-m.style.color="var(--muted)";m.textContent="Tickets aren’t connected yet. Use WhatsApp below for now."});
 window.addEventListener("hashchange",route);render();route();
 })();
 </script>
-<script type="module" src="./dash.js"></script>
-<script type="module" src="./live.js"></script>
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyAW1QoZGKDUgBYL4rkgjqxTLC66bHRyYfU",
+  authDomain: "betterhub-c69b8.firebaseapp.com",
+  projectId: "betterhub-c69b8",
+  storageBucket: "betterhub-c69b8.firebasestorage.app",
+  messagingSenderId: "852351882076",
+  appId: "1:852351882076:web:7ad526c1c532509f5ee799"
+};
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+import { onAuthStateChanged, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+const $ = (i) => document.getElementById(i);
+let started = false;
+
+onAuthStateChanged(auth, (u) => {
+  if (!u) { location.replace("index.html#login"); return; }
+  document.body.classList.add("ready");
+  if (started) return; started = true;
+  const name = u.displayName || u.email.split("@")[0];
+  $("hi").textContent = "Hi, " + name;
+  $("pn").value = name; $("pe").value = u.email;
+  $("out").onclick = async () => { await signOut(auth); location.href = "index.html"; };
+
+  const bar = $("acct");
+  function note(text, ...btns) {
+    bar.hidden = false; bar.textContent = "";
+    const s = document.createElement("span"); s.textContent = text; bar.append(s);
+    btns.forEach(([label, fn]) => { const b = document.createElement("button"); b.className = "ib"; b.textContent = label; b.onclick = fn; bar.append(b); });
+  }
+  function verifyBar() {
+    if (auth.currentUser.emailVerified) { bar.hidden = true; return; }
+    note("Verify your email. We sent a link to " + u.email + ".",
+      ["Resend link", async () => { try { await sendEmailVerification(auth.currentUser); note("Link sent. Check your inbox and spam.", ["I’ve verified", check]); } catch (e) { note("Wait a minute before asking again.", ["I’ve verified", check]); } }],
+      ["I’ve verified", check]);
+  }
+  async function check() { await auth.currentUser.reload(); verifyBar(); if (!auth.currentUser.emailVerified) note("Not verified yet. Open the link in the email, then tap again.", ["I’ve verified", check]); }
+  verifyBar();
+
+  onSnapshot(doc(db, "users", u.uid), (s) => {
+    const st = s.exists() ? s.data().status : "active";
+    $("pst").textContent = st;
+    if (st === "suspended") note("This account is suspended. Contact support on WhatsApp.");
+  }, () => { $("pst").textContent = "unavailable"; });
+
+  onSnapshot(doc(db, "wallets", u.uid), (s) => {
+    const kobo = s.exists() ? Number(s.data().balance) || 0 : 0;
+    const t = "₦" + (kobo / 100).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.querySelectorAll("[data-bal]").forEach((el) => (el.textContent = t));
+  }, () => {});
+});
+</script>
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyAW1QoZGKDUgBYL4rkgjqxTLC66bHRyYfU",
+  authDomain: "betterhub-c69b8.firebaseapp.com",
+  projectId: "betterhub-c69b8",
+  storageBucket: "betterhub-c69b8.firebasestorage.app",
+  messagingSenderId: "852351882076",
+  appId: "1:852351882076:web:7ad526c1c532509f5ee799"
+};
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+// Customer dashboard live data: makes sure the wallet exists, then shows real transactions and notifications.
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+const $ = (i) => document.getElementById(i);
+const money = (k) => (k / 100).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const LABEL = { deposit: "Wallet funding", purchase: "Number purchase", refund: "Refund", adjustment: "Balance adjustment" };
+const when = (ts) => (ts && ts.toMillis ? new Date(ts.toMillis()).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" }) : "just now");
+
+function row(title, sub, right, rightClass) {
+  const r = document.createElement("div"); r.className = "row";
+  const l = document.createElement("div"); l.append(title);
+  const s = document.createElement("small"); s.textContent = sub; l.append(s);
+  r.append(l);
+  if (right) { const b = document.createElement("b"); b.textContent = right; b.className = rightClass || ""; r.append(b); }
+  return r;
+}
+function fill(el, rows) { el.textContent = ""; rows.forEach((r) => el.append(r)); }
+const ms = (d) => (d.createdAt && d.createdAt.toMillis ? d.createdAt.toMillis() : Date.now());
+
+onAuthStateChanged(auth, async (u) => {
+  if (!u) return;
+  try {
+    const t = await u.getIdToken();
+    const br = await fetch("/api", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + t }, body: JSON.stringify({ scope: "customer", action: "bootstrap" }) });
+    const bj = await br.json().catch(() => ({}));
+    if (bj.maintenance) { const n = document.createElement("div"); n.className = "banner"; n.setAttribute("role", "status"); n.textContent = bj.maintenanceMessage || "BetterHub is under maintenance. Some services are paused."; document.querySelector("main").prepend(n); }
+  } catch (e) { /* wallet shows 0 until the server is reachable */ }
+
+  async function api(body) {
+    const t = await u.getIdToken();
+    const r = await fetch("/api", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + t }, body: JSON.stringify({ scope: "customer", ...body }) });
+    const j = await r.json().catch(() => ({ error: "unavailable" }));
+    if (!r.ok) throw new Error(j.error === "unavailable" ? "The server isn’t available yet. Try again later or message us on WhatsApp." : j.error || "Request failed");
+    return j;
+  }
+  async function loadTickets() {
+    try {
+      const r = await api({ action: "myTickets" });
+      if (!r.tickets.length) return;
+      const box = $("tkList"); box.textContent = "";
+      r.tickets.forEach((t) => {
+        const c = document.createElement("div"); c.className = "card";
+        const top = document.createElement("div"); top.style.cssText = "display:flex;justify-content:space-between;gap:8px";
+        const b = document.createElement("b"); b.textContent = t.subject;
+        const st = document.createElement("span"); st.className = "pill " + (t.status === "closed" ? "ok" : "warn"); st.textContent = t.status === "closed" ? "Closed" : "Open";
+        top.append(b, st);
+        const m = document.createElement("p"); m.style.margin = "6px 0"; m.textContent = t.message;
+        c.append(top, m);
+        (t.replies || []).forEach((x) => { const p = document.createElement("p"); p.className = "small"; p.style.cssText = "margin:6px 0;padding:8px 10px;background:var(--soft);border-radius:10px"; p.textContent = "Support: " + x.message; c.append(p); });
+        box.append(c);
+      });
+    } catch (e) { /* list stays empty */ }
+  }
+  loadTickets();
+  $("payBtn").onclick = async () => {
+    const m = $("payMsg"), btn = $("payBtn"), amt = Number($("amt").value);
+    if (!Number.isFinite(amt) || amt < 100) { m.style.color = "var(--bad)"; m.textContent = "Enter at least ₦100."; return; }
+    btn.disabled = true; m.style.color = "var(--muted)"; m.textContent = "Opening Paystack...";
+    try { const r = await api({ action: "startDeposit", amountNaira: amt }); location.href = r.url; }
+    catch (x) { m.style.color = "var(--bad)"; m.textContent = x.message; btn.disabled = false; }
+  };
+  const payRef = new URLSearchParams(location.search).get("reference");
+  if (payRef) {
+    history.replaceState(null, "", "app.html"); location.hash = "#wallet";
+    const m = $("payMsg"); m.style.color = "var(--muted)"; m.textContent = "Confirming your payment...";
+    try {
+      const r = await api({ action: "verifyDeposit", reference: payRef });
+      m.textContent = r.status === "success" ? "Payment confirmed. Your wallet has been funded."
+        : r.status === "pending" ? "Not confirmed yet. It will be added as soon as Paystack confirms it."
+        : "The payment was not completed. If money left your account, message support with reference " + payRef + ".";
+    } catch (x) { m.style.color = "var(--bad)"; m.textContent = x.message; }
+  }
+  $("tk").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const f = e.target, m = $("tkm"), btn = f.querySelector("button");
+    const subject = f.s.value.trim(), message = f.m.value.trim();
+    m.style.color = "var(--bad)";
+    if (!subject || !message) { m.textContent = "Add a subject and a message."; return; }
+    btn.disabled = true; m.style.color = "var(--muted)"; m.textContent = "Sending...";
+    try { await api({ action: "createTicket", subject, message }); f.reset(); m.textContent = "Ticket sent. Our reply will show below and in Notifications."; loadTickets(); }
+    catch (x) { m.style.color = "var(--bad)"; m.textContent = x.message; }
+    btn.disabled = false;
+  });
+
+  onSnapshot(query(collection(db, "walletTransactions"), where("userId", "==", u.uid)), (snap) => {
+    const items = snap.docs.map((x) => x.data()).sort((a, b) => ms(b) - ms(a)).slice(0, 50);
+    if (!items.length) return;
+    const rows = items.map((x) => row(LABEL[x.type] || x.type, x.reference + " · " + when(x.createdAt), (x.amount > 0 ? "+₦" : "-₦") + money(Math.abs(x.amount)), x.amount > 0 ? "in" : "out"));
+    fill($("txList"), rows);
+    fill($("recent"), rows.slice(0, 5).map((r) => r.cloneNode(true)));
+  }, () => {});
+
+  onSnapshot(query(collection(db, "notifications"), where("userId", "==", u.uid)), (snap) => {
+    const items = snap.docs.map((x) => x.data()).sort((a, b) => ms(b) - ms(a)).slice(0, 50);
+    if (!items.length) return;
+    fill($("noteList"), items.map((n) => row(n.title, (n.body ? n.body + " · " : "") + when(n.createdAt))));
+  }, () => {});
+});
+</script>
 </body>
 </html>
