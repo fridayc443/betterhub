@@ -1,23 +1,26 @@
-# BetterHub
+# BetterHub (complete, latest)
 
-Status: Phases 1-4 written (public site, auth, dashboard, wallet ledger, provider layer, admin v1).
-Not yet built: order engine, refunds automation, payment gateway, support tickets.
+Files
+- index.html: public site, sign-up and login
+- app.html: customer dashboard (wallet, Paystack funding, transactions, notifications, support tickets)
+- admin.html: admin dashboard (overview, supplier check + catalogue explorer, pricing, categories, customers, wallet adjustments, tickets, payments check, settings)
+- netlify/functions/api.js: the whole server in one file (wallet ledger, pricing, Get Your OTP adapter, Paystack, tickets)
+- netlify.toml, package.json: build settings
+- firestore.rules: paste into Firebase > Firestore > Rules > Publish (not deployed with the site)
 
-## Run locally (needs Node 20+)
-1. Unzip, open a terminal in the folder.
-2. `npm install`
-3. Copy `.env.example` to `.env` and fill it in (service account values from Firebase > Project settings > Service accounts).
-4. `npx netlify-cli dev`
-5. Open http://localhost:8888 (site) and http://localhost:8888/admin.html (admin, needs your email in ADMIN_EMAILS and verified).
+Netlify environment variables (names only; set the values in Netlify, never in files or chat)
+- FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY
+- ADMIN_EMAILS (your login email, must be verified)
+- GYO_API_KEY (Get Your OTP)
+- PAYSTACK_SECRET_KEY (use sk_test_ first)
+- SITE_URL (optional; set to your custom domain later, default is https://betterhubhq.netlify.app)
 
-Local testing uses your real Firebase project, so wallet credits you make are real data in that project.
-In Firebase, publish `firestore.rules` (Firestore > Rules). `localhost` is already an authorized auth domain.
+Paystack webhook URL: https://betterhubhq.netlify.app/paystack-webhook
 
-## Files
-- index.html, auth.js: public site and sign-up/login
-- app.html, dash.js, live.js: customer dashboard
-- admin.html, admin.js: admin dashboard
-- firebase.js: public web config
-- firestore.rules: database security rules
-- netlify/functions/: server code (customer.js, admin.js, lib/core.js wallet + pricing, lib/providers.js supplier adapters)
-- netlify.toml, package.json: build config
+Status
+- Written and syntax-checked: everything above.
+- Not tested against live Firebase, Paystack or Get Your OTP.
+- Not built yet: buying numbers (needs Get Your OTP's real replies), automatic refunds, order retries.
+
+Deploy on a phone: the server file needs Netlify's build (npm install), so deploy from a GitHub repo linked to Netlify.
+A pages-only upload (betterhub-site.zip) works for the website but not for api.js.
